@@ -15,6 +15,8 @@ public class Game {
 
     public Game() {
         history = new HashMap<>();
+        this.coin = Coin.getInstance();
+        this.rules = Rules.getInstance();
     }
 
     /**
@@ -24,13 +26,26 @@ public class Game {
      */
     public void addPlayer(Player player) {
       // TODO: Votre code ici
+        history.put(player, new ArrayList<>());
     }
 
     /**
-     * Faire joueur tous les joueurs et stocker chaque partie dans history
+     * Faire jouer tous les joueurs et stocker chaque partie dans history
      */
     public void play() {
       // TODO: Votre code ici
+        List<CoinState> currentCoinState;
+
+        for (Player p : history.keySet()) {
+            currentCoinState = new ArrayList<>();
+
+            while (!rules.checkWin(currentCoinState)) {
+                coin.throwCoin();
+                currentCoinState.add(coin.getState());
+            }
+
+            history.put(p, currentCoinState);
+        }
     }
 
     /**
@@ -39,8 +54,32 @@ public class Game {
      * @return Statistics
      */
     public Statistics getStatistics() {
-      // TODO: Votre code ici
-      return null;
+        int fewerMoves = history.get(history.keySet().toArray()[0]).size();
+
+        for (Player p : history.keySet()) {
+            int currentFewerMoves = history.get(p).size();
+
+            if (currentFewerMoves < fewerMoves)
+                fewerMoves = currentFewerMoves;
+        }
+
+        int mostMoves = history.get(history.keySet().toArray()[0]).size();
+
+        for (Player p : history.keySet()) {
+            int currentMostMoves = history.get(p).size();
+
+            if (currentMostMoves > mostMoves)
+                mostMoves = currentMostMoves;
+        }
+
+        int totalMoves = 0;
+
+        for (Player p : history.keySet())
+            totalMoves += history.get(p).size();
+
+        float averageToWin = totalMoves / (float)history.keySet().size();
+
+        return new Statistics(averageToWin, fewerMoves, mostMoves, totalMoves);
     }
 
     /**
@@ -49,8 +88,7 @@ public class Game {
      * @return Map contenant chaque joueur et la liste des ses lancers
      */
     public Map<Player, List<CoinState>> getHistory() {
-      // TODO: Votre code ici
-      return null;
+      return this.history;
     }
 
 
@@ -61,8 +99,7 @@ public class Game {
      * @return la liste des lancers d'un joueur
      */
     public List<CoinState> getSpecificHistory(Player player) {
-      // TODO: Votre code ici
-      return null;
+      return this.history.get(player);
     }
 
 }
